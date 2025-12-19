@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prismaClient } from "db/client";
+import prismaClient from "db/client";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
@@ -56,6 +56,7 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async signIn({ user, account }) {
             // Handle Google OAuth - create or update user
+            console.log("google sign in callback nextjs auth")
             if (account?.provider === "google") {
                 try {
                     const existingUser = await prismaClient.user.findUnique({

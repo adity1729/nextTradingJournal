@@ -1,6 +1,6 @@
 "use server";
 
-import { prismaClient } from "db/client";
+import prismaClient from "db/client";
 import bcrypt from "bcryptjs";
 
 // Types for action responses
@@ -12,10 +12,14 @@ export type ActionResponse = {
 
 // Sign Up Action
 export async function signUpAction(formData: FormData): Promise<ActionResponse> {
+    console.log("incoming info", formData)
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+
+    console.log("password type", typeof password)
+
 
     // Validation
     if (!name || !email || !password || !confirmPassword) {
@@ -54,10 +58,11 @@ export async function signUpAction(formData: FormData): Promise<ActionResponse> 
 
     try {
         // Check if user already exists
+        console.log('checking exisiting uesr')
         const existingUser = await prismaClient.user.findUnique({
             where: { email },
         });
-
+        console.log('exisitingUser', existingUser)
         if (existingUser) {
             return {
                 success: false,
@@ -67,8 +72,10 @@ export async function signUpAction(formData: FormData): Promise<ActionResponse> 
         }
 
         // Hash password
+        console.log('hassing pass')
         const hashedPassword = await bcrypt.hash(password, 12);
-
+        console.log('hased Pass')
+        console.log(typeof hashedPassword)
         // Create user
         await prismaClient.user.create({
             data: {

@@ -34,12 +34,15 @@ export default function Auth({ mode }: AuthProps) {
         setError("");
 
         const formData = new FormData(e.currentTarget);
-
+        console.log('formData', formData.get('password'))
+        console.log('formdata type', typeof formData.get('password'))
+        console.log('isSignUp', isSignUp)
         if (isSignUp) {
             // Handle Sign Up
             startTransition(async () => {
+                console.log('before signup')
                 const result = await signUpAction(formData);
-
+                console.log('after signup')
                 if (result.success) {
                     // Auto sign in after successful signup
                     const email = formData.get("email") as string;
@@ -188,7 +191,7 @@ export default function Auth({ mode }: AuthProps) {
                             <Input
                                 id="password"
                                 name="password"
-                                type="password"
+                                type="String"
                                 required
                                 placeholder="••••••••"
                                 disabled={isLoading}
@@ -202,7 +205,7 @@ export default function Auth({ mode }: AuthProps) {
                                 <Input
                                     id="confirmPassword"
                                     name="confirmPassword"
-                                    type="password"
+                                    type="String"
                                     required
                                     placeholder="••••••••"
                                     disabled={isLoading}
