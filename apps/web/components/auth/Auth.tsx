@@ -3,10 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
@@ -15,7 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { signUpAction } from "@/app/(auth)/actions";
+
 
 interface AuthProps {
     mode: "signin" | "signup";
@@ -28,64 +25,6 @@ export default function Auth({ mode }: AuthProps) {
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
     const isSignUp = mode === "signup";
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setError("");
-
-        const formData = new FormData(e.currentTarget);
-        console.log('formData', formData.get('password'))
-        console.log('formdata type', typeof formData.get('password'))
-        console.log('isSignUp', isSignUp)
-        if (isSignUp) {
-            // Handle Sign Up
-            startTransition(async () => {
-                console.log('before signup')
-                const result = await signUpAction(formData);
-                console.log('after signup')
-                if (result.success) {
-                    // Auto sign in after successful signup
-                    const email = formData.get("email") as string;
-                    const password = formData.get("password") as string;
-
-                    const signInResult = await signIn("credentials", {
-                        email,
-                        password,
-                        redirect: false,
-                    });
-
-                    if (signInResult?.error) {
-                        // If auto sign-in fails, redirect to sign in page
-                        router.push("/signin");
-                    } else {
-                        router.push("/dashboard");
-                        router.refresh();
-                    }
-                } else {
-                    setError(result.message);
-                }
-            });
-        } else {
-            // Handle Sign In
-            const email = formData.get("email") as string;
-            const password = formData.get("password") as string;
-
-            startTransition(async () => {
-                const result = await signIn("credentials", {
-                    email,
-                    password,
-                    redirect: false,
-                });
-
-                if (result?.error) {
-                    setError("Invalid email or password");
-                } else {
-                    router.push("/dashboard");
-                    router.refresh();
-                }
-            });
-        }
-    };
 
     const handleGoogleSignIn = () => {
         setIsGoogleLoading(true);
@@ -109,14 +48,12 @@ export default function Auth({ mode }: AuthProps) {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                    {/* Error message */}
                     {error && (
                         <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
                             {error}
                         </div>
                     )}
 
-                    {/* Google Sign In Button */}
                     <Button
                         variant="outline"
                         className="w-full"
@@ -145,133 +82,8 @@ export default function Auth({ mode }: AuthProps) {
                         Continue with Google
                     </Button>
 
-                    {/* Divider */}
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-card px-2 text-muted-foreground">
-                                or continue with email
-                            </span>
-                        </div>
-                    </div>
 
-                    {/* Auth Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Name field - only for signup */}
-                        {isSignUp && (
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Full Name</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    type="text"
-                                    required
-                                    placeholder="John Doe"
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        )}
-
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                placeholder="you@example.com"
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="String"
-                                required
-                                placeholder="••••••••"
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        {/* Confirm Password - only for signup */}
-                        {isSignUp && (
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                <Input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="String"
-                                    required
-                                    placeholder="••••••••"
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        )}
-
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isPending ? (
-                                <span className="flex items-center gap-2">
-                                    <svg
-                                        className="animate-spin h-4 w-4"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
-                                    </svg>
-                                    {isSignUp ? "Creating account..." : "Signing in..."}
-                                </span>
-                            ) : isSignUp ? (
-                                "Create Account"
-                            ) : (
-                                "Sign In"
-                            )}
-                        </Button>
-                    </form>
                 </CardContent>
-
-                <CardFooter className="justify-center">
-                    <p className="text-sm text-muted-foreground">
-                        {isSignUp ? (
-                            <>
-                                Already have an account?{" "}
-                                <Link
-                                    href="/signin"
-                                    className="font-medium text-foreground hover:underline"
-                                >
-                                    Sign in
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                Don&apos;t have an account?{" "}
-                                <Link
-                                    href="/signup"
-                                    className="font-medium text-foreground hover:underline"
-                                >
-                                    Sign up
-                                </Link>
-                            </>
-                        )}
-                    </p>
-                </CardFooter>
             </Card>
         </div>
     );

@@ -9,49 +9,7 @@ export const authOptions: NextAuthOptions = {
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-        CredentialsProvider({
-            name: "credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Email and password are required");
-                }
-
-                const user = await prismaClient.user.findUnique({
-                    where: { email: credentials.email },
-                });
-
-                if (!user) {
-                    throw new Error("Invalid email or password");
-                }
-
-                if (!user.password) {
-                    throw new Error(
-                        "This account uses Google sign-in. Please use the Google button."
-                    );
-                }
-
-                const isPasswordValid = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isPasswordValid) {
-                    throw new Error("Invalid email or password");
-                }
-
-                return {
-                    id: String(user.id),
-                    email: user.email,
-                    name: user.name,
-                    image: user.avatarUrl,
-                };
-            },
-        }),
+        })
     ],
     callbacks: {
         async signIn({ user, account }) {
