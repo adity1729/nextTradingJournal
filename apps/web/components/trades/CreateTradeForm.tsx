@@ -30,6 +30,7 @@ type TradeResponse = {
 export function CreateTradeForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<TradeResponse | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -46,6 +47,11 @@ export function CreateTradeForm() {
 
             const data = await response.json();
             setResult(data);
+
+            // Reset file selection on success
+            if (data.success) {
+                setSelectedFiles(null);
+            }
         } catch (error) {
             setResult({
                 success: false,
@@ -54,6 +60,10 @@ export function CreateTradeForm() {
         } finally {
             setIsLoading(false);
         }
+    }
+
+    function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setSelectedFiles(event.target.files);
     }
 
     return (
@@ -96,16 +106,26 @@ export function CreateTradeForm() {
                     />
                 </div>
 
-                {/* Screenshots (Optional) */}
+                {/* Screenshots (Optional) - Using native input for better multiple file support */}
                 <div className="space-y-2">
                     <Label htmlFor="screenshots">Screenshots (optional)</Label>
-                    <Input
+                    <input
                         id="screenshots"
                         name="screenshots"
                         type="file"
                         accept="image/*"
                         multiple
+                        onChange={handleFileChange}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:file:text-zinc-300"
                     />
+                    {selectedFiles && selectedFiles.length > 0 && (
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            {selectedFiles.length} file{selectedFiles.length > 1 ? "s" : ""} selected
+                        </p>
+                    )}
+                    <p className="text-xs text-zinc-400">
+                        💡 Hold Cmd (Mac) or Ctrl (Windows) to select multiple files
+                    </p>
                 </div>
 
                 {/* Submit Button */}
@@ -118,14 +138,14 @@ export function CreateTradeForm() {
             {result && (
                 <div
                     className={`mt-6 p-4 rounded-md ${result.success
-                            ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
-                            : "bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                        ? "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                        : "bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800"
                         }`}
                 >
                     <h3
                         className={`font-semibold ${result.success
-                                ? "text-green-800 dark:text-green-200"
-                                : "text-red-800 dark:text-red-200"
+                            ? "text-green-800 dark:text-green-200"
+                            : "text-red-800 dark:text-red-200"
                             }`}
                     >
                         {result.success ? "✅ Trade Created!" : "❌ Error"}
@@ -138,3 +158,4 @@ export function CreateTradeForm() {
         </div>
     );
 }
+
