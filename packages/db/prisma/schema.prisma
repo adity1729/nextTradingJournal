@@ -42,7 +42,7 @@ model Session {
   id String @id @default(cuid())
   sessionToken String @unique
   userId Int
-  expries DateTime
+  expires DateTime
   user User @relation(fields:[userId], references:[id], onDelete:Cascade)
 
   @@index([userId])
@@ -54,14 +54,21 @@ model Trade {
   userId    Int
   symbol    String  
   side      TradeSide
-  quantity  Int
-  price     Decimal  @db.Decimal(10, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  note String?
 
+  screenshots TradeScreenshot[]
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
   @@index([symbol])
+}
+
+model TradeScreenshot {
+  id Int @id @default(autoincrement())
+  tradeId Int
+  url String
+  trade Trade @relation(fields:[tradeId], references:[id], onDelete: Cascade)
 }
 
 model Account {
