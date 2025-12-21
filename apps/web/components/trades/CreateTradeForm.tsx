@@ -4,28 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axios from "axios";
+import type { Trade, TradeScreenshot, ApiResponse } from "@repo/common/types";
 
-type TradeScreenshot = {
-    id: number;
-    tradeId: number;
-    url: string;
-};
-
-type TradeResponse = {
-    success: boolean;
-    trade?: {
-        id: number;
-        uuid: string;
-        symbol: string;
-        side: string;
-        note: string | null;
-        screenshots: TradeScreenshot[];
-        createdAt: string;
-        updatedAt: string;
-    };
-    error?: string;
-    details?: unknown;
-};
+// Response type for create trade API
+type TradeResponse = ApiResponse<Trade>;
 
 export function CreateTradeForm() {
     const [isLoading, setIsLoading] = useState(false);
@@ -40,12 +23,11 @@ export function CreateTradeForm() {
         const formData = new FormData(event.currentTarget);
 
         try {
-            const response = await fetch("/api/trades", {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
+            const response = await axios.post(
+                "/api/trades",
+                formData
+            )
+            const data = response.data
             setResult(data);
 
             // Reset file selection on success
@@ -53,10 +35,12 @@ export function CreateTradeForm() {
                 setSelectedFiles(null);
             }
         } catch (error) {
-            setResult({
-                success: false,
-                error: error instanceof Error ? error.message : "Unknown error",
-            });
+            if (axios.isAxiosError(error)) {
+                setResult({
+                    success: false,
+                    error: error.response?.data?.error || "Request failed"
+                })
+            }
         } finally {
             setIsLoading(false);
         }

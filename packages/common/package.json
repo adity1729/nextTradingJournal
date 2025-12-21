@@ -1,0 +1,17 @@
+{
+  "name": "@repo/common",
+  "version": "1.0.0",
+  "description": "Shared types, validations, and constants",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types/index.ts",
+    "./validations": "./src/validations/index.ts",
+    "./constants": "./src/constants/index.ts"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
+}

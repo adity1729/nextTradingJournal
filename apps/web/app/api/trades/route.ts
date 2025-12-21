@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prismaClient from "db/client";
-import { createTradeSchema } from "@/lib/validations/trade";
+import prismaClient from "@repo/db/client";
+import { createTradeSchema } from "@repo/common/validations";
 import { uploadMultipleToS3 } from "@/lib/s3";
 
-/**
- * POST /api/trades
- * Creates a new trade for the authenticated user
- * 
- * Request: multipart/form-data
- * - symbol: string (required)
- * - side: "BUY" | "SELL" (required)
- * - note: string (optional)
- * - screenshots: File[] (optional)
- */
 export async function POST(request: NextRequest) {
     try {
         // 1. Check if user is authenticated
