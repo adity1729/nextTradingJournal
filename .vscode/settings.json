@@ -1,8 +1,0 @@
-{
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ],
-  "prisma.pinToPrisma6": false
-}
