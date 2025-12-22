@@ -7,16 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import TradeDetailModal from "@/components/trades/TradeDetailModal";
 import AddTradeModal from "@/components/trades/AddTradeModal";
+import type { TradeWithScreenshots, WeekTotal } from "@/types/trade";
 import {
-    TradeWithScreenshots,
     getTradesByDate,
     getDayProfit,
     getDayStats,
     formatCurrency,
     getDaysInMonth,
     getFirstDayOfMonth,
-    WeekTotal
-} from "@/types/trade";
+} from "@/lib/trade-utils";
 
 const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',

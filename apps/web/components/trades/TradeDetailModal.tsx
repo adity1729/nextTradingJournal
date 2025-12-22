@@ -5,7 +5,8 @@ import { X, TrendingUp, TrendingDown, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { TradeWithScreenshots, formatCurrency } from "@/types/trade";
+import type { TradeWithScreenshots } from "@/types/trade";
+import { formatCurrency } from "@/lib/trade-utils";
 import { deleteTrade } from "@/app/trades/actions";
 
 interface TradeDetailModalProps {

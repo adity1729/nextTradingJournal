@@ -15,10 +15,45 @@ export interface Trade {
     userId: number;
     symbol: string;
     side: TradeSide;  // Direct enum, not an object
+    tradeDate: Date | string;
+    profitLoss: number;
     createdAt: Date | string;
     updatedAt: Date | string;
     note?: string | null;
     screenshots?: TradeScreenshot[];
+}
+
+// Trade with screenshots included (for queries with include)
+export interface TradeWithScreenshots {
+    id: number;
+    uuid: string;
+    userId: number;
+    symbol: string;
+    side: TradeSide;
+    tradeDate: Date;
+    profitLoss: number;
+    createdAt: Date;
+    updatedAt: Date;
+    note: string | null;
+    screenshots: {
+        id: number;
+        url: string;
+    }[];
+}
+
+// Day statistics for calendar view
+export interface DayStats {
+    totalProfit: number;
+    profitableTrades: number;
+    lossTrades: number;
+    totalTrades: number;
+}
+
+// Weekly totals for sidebar
+export interface WeekTotal {
+    weekNumber: number;
+    total: number;
+    tradingDays: number;
 }
 
 // API Response types
