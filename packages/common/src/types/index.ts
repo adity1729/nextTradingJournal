@@ -70,3 +70,20 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+// Input type for adding a trade via API
+export interface AddTradeInput {
+    symbol: string;
+    side: TradeSide;
+    tradeDate: string; // ISO date string
+    profitLoss: number;
+    note?: string;
+}
+
+// Input type for updating a trade via API
+export interface UpdateTradeInput {
+    symbol?: string;
+    side?: TradeSide;
+    tradeDate?: string;
+    profitLoss?: number;
+    note?: string;
+}

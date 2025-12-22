@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { addTrade, AddTradeInput } from "@/app/trades/actions";
+import { addTradeApi } from "@/lib/api/trades";
+import type { AddTradeInput } from "@repo/common/types";
 
 interface AddTradeModalProps {
     isOpen: boolean;
@@ -15,6 +17,7 @@ interface AddTradeModalProps {
 }
 
 export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalProps) {
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         symbol: "",
@@ -45,12 +48,14 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
                 note: formData.note || undefined
             };
 
-            const result = await addTrade(input);
+            const result = await addTradeApi(input);
 
             if (result.success) {
                 // Reset form and close
                 setFormData({ symbol: "", side: "BUY", profitLoss: "", note: "" });
                 onClose();
+                // Refresh to get updated data
+                router.refresh();
             } else {
                 console.error("Failed to add trade:", result.error);
             }
@@ -63,13 +68,11 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={onClose}
             />
 
-            {/* Modal */}
             <Card className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-xl shadow-2xl border-0 rounded-3xl mx-4">
                 <CardHeader className="border-b border-slate-100 pb-4">
                     <div className="flex items-center justify-between">

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { X, TrendingUp, TrendingDown, Trash2, Edit2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { X, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { TradeWithScreenshots } from "@/types/trade";
+import type { TradeWithScreenshots } from "@repo/common/types";
 import { formatCurrency } from "@/lib/trade-utils";
-import { deleteTrade } from "@/app/trades/actions";
+import { deleteTradeApi } from "@/lib/api/trades";
 
 interface TradeDetailModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ interface TradeDetailModalProps {
 }
 
 export default function TradeDetailModal({ isOpen, onClose, date, trades }: TradeDetailModalProps) {
+    const router = useRouter();
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
     if (!isOpen) return null;
@@ -33,8 +35,13 @@ export default function TradeDetailModal({ isOpen, onClose, date, trades }: Trad
     const handleDelete = async (tradeId: number) => {
         setIsDeleting(tradeId);
         try {
-            await deleteTrade(tradeId);
-            // Page will revalidate automatically
+            const result = await deleteTradeApi(tradeId);
+            if (result.success) {
+                // Refresh to get updated data
+                router.refresh();
+            } else {
+                console.error("Failed to delete trade:", result.error);
+            }
         } catch (error) {
             console.error("Failed to delete trade:", error);
         }

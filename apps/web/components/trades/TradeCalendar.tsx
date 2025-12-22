@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import TradeDetailModal from "@/components/trades/TradeDetailModal";
 import AddTradeModal from "@/components/trades/AddTradeModal";
-import type { TradeWithScreenshots, WeekTotal } from "@/types/trade";
+import type { TradeWithScreenshots, WeekTotal } from "@repo/common/types";
 import {
     getTradesByDate,
     getDayProfit,
