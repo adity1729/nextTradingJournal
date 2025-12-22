@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
         // 5. Get the user's database ID from their email
         const user = await prismaClient.user.findUnique({
-            where: { email: session.user.email! },
+            where: { email: session.user.email },
             select: { id: true },
         });
 

@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
   importFileExtension = "ts"
 }
 
@@ -14,78 +14,80 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum TradeSide {
   BUY
   SELL
 }
 
-
-model User{
-  id    Int @id @default(autoincrement())
+model User {
+  id            Int       @id @default(autoincrement())
   // @db.Uuid ensures the database stores UUID efficiently using its native UUID type. If we don't use @db.Uuid, DB will store UUID as a string, which is less efficient.
-  uuid String @unique @default(uuid()) @db.Uuid 
-  name String? 
-  email String @unique
+  uuid          String    @unique @default(uuid()) @db.Uuid
+  name          String?
+  email         String    @unique
   emailVerified DateTime?
-  avatarUrl String?
-  password String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  avatarUrl     String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   accounts Account[]
-  trades Trade[]
+  trades   Trade[]
   sessions Session[]
 }
 
 model Session {
-  id String @id @default(cuid())
-  sessionToken String @unique
-  userId Int
-  expires DateTime
-  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Trade {
-  id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default(uuid()) @db.Uuid
-  userId    Int
-  symbol    String  
-  side      TradeSide
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  note String?
+  id         Int       @id @default(autoincrement())
+  uuid       String    @unique @default(uuid()) @db.Uuid
+  userId     Int
+  symbol     String
+  side       TradeSide
+  tradeDate  DateTime  @default(now())
+  profitLoss Float     @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  note       String?
 
   screenshots TradeScreenshot[]
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([symbol])
+  @@index([tradeDate])
 }
 
 model TradeScreenshot {
-  id Int @id @default(autoincrement())
+  id      Int    @id @default(autoincrement())
   tradeId Int
-  url String
-  trade Trade @relation(fields:[tradeId], references:[id], onDelete: Cascade)
+  url     String
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 }
 
 model Account {
-  id String @id @default(cuid())
-  userId Int
-  type String
-  provider String
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
   providerAccountId String
-  refresh_token String? @db.Text
-  access_token String @db.Text
-  expires_at Int?
-  token_type String?
-  scope String?
-  id_token String? @db.Text
-  session_state String?
+  refresh_token     String? @db.Text
+  access_token      String  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
-  user User @relation(fields:[userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
