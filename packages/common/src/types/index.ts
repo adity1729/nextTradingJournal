@@ -70,6 +70,10 @@ export interface ApiErrorResponse {
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+export interface ScreenShotInput {
+    file: File
+}
+
 // Input type for adding a trade via API
 export interface AddTradeInput {
     symbol: string;
@@ -77,6 +81,7 @@ export interface AddTradeInput {
     tradeDate: string; // ISO date string
     profitLoss: number;
     note?: string;
+    screenshots?: ScreenShotInput[];
 }
 
 // Input type for updating a trade via API

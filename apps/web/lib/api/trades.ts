@@ -25,10 +25,10 @@ function getErrorMessage(error: unknown): string {
 }
 
 export async function addTradeApi(
-    input: AddTradeInput
+    formData: FormData
 ): Promise<ApiResponse<TradeWithScreenshots>> {
     try {
-        const { data } = await api.post("", input);
+        const { data } = await api.post("", formData);
 
         return {
             success: true,

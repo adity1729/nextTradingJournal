@@ -19,6 +19,8 @@ interface AddTradeModalProps {
 export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+
     const [formData, setFormData] = useState({
         symbol: "",
         side: "BUY" as "BUY" | "SELL",
@@ -35,20 +37,30 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
         day: 'numeric'
     });
 
+    function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setSelectedFiles(event.target.files)
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        const sendFormData = new FormData();
+        sendFormData.append("symbol", formData.symbol.toUpperCase())
+        sendFormData.append("side", formData.side);
+        sendFormData.append("tradeDate", date);
+        sendFormData.append("profitLoss",
+            String(parseFloat(formData.profitLoss) || 0)
+        )
+        if (formData.note) sendFormData.append("note", formData.note);
+        if (selectedFiles) {
+            Array.from(selectedFiles).forEach(file => {
+                sendFormData.append("screenshots", file);
+            });
+        }
 
         try {
-            const input: AddTradeInput = {
-                symbol: formData.symbol.toUpperCase(),
-                side: formData.side,
-                tradeDate: date,
-                profitLoss: parseFloat(formData.profitLoss) || 0,
-                note: formData.note || undefined
-            };
 
-            const result = await addTradeApi(input);
+            const result = await addTradeApi(sendFormData);
 
             if (result.success) {
                 // Reset form and close
@@ -74,7 +86,7 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
             />
 
             <Card className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-xl shadow-2xl border-0 rounded-3xl mx-4">
-                <CardHeader className="border-b border-slate-100 pb-4">
+                <CardHeader className="border-b border-slate-100 [.border-b]:pb-0">
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle className="text-xl font-bold text-slate-800">
@@ -95,7 +107,7 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
                     </div>
                 </CardHeader>
 
-                <CardContent className="p-6">
+                <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Symbol */}
                         <div className="space-y-2">
@@ -162,7 +174,27 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
                                 className="w-full min-h-[80px] px-3 py-2 rounded-xl border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                         </div>
-
+                        {/* Screenshot */}
+                        <div className="space-y-2">
+                            <Label htmlFor="screenshots">Screenshots (optional)</Label>
+                            <input
+                                id="screenshots"
+                                name="screenshots"
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleFileChange}
+                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:file:text-zinc-300"
+                            />
+                            {selectedFiles && selectedFiles.length > 0 && (
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                                    {selectedFiles.length} file{selectedFiles.length > 1 ? "s" : ""} selected
+                                </p>
+                            )}
+                            <p className="text-xs text-zinc-400">
+                                💡 Hold Cmd (Mac) or Ctrl (Windows) to select multiple files
+                            </p>
+                        </div>
                         {/* Submit Button */}
                         <Button
                             type="submit"
