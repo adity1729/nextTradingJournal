@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prismaClient from "@repo/db/client";
-import { createTradeSchema, addTradeSchema } from "@repo/common/validations";
-import { uploadMultipleToS3 } from "@/lib/s3";
+import { createTradeSchema } from "@repo/common/validations";
+import { getPresignedUrl, uploadMultipleToS3 } from "@/lib/s3";
+import { Trade, TradeScreenshot } from "@repo/common";
+import { getTradesForUser } from "@/lib/services/trades";
 
 
 async function getAuthenticatedUserId(): Promise<number | null> {
@@ -19,6 +21,7 @@ async function getAuthenticatedUserId(): Promise<number | null> {
 }
 
 export async function GET() {
+    console.log("get request triggered for /trades")
     try {
         const userId = await getAuthenticatedUserId();
 
@@ -28,19 +31,7 @@ export async function GET() {
                 { status: 401 }
             );
         }
-
-        const trades = await prismaClient.trade.findMany({
-            where: { userId },
-            include: {
-                screenshots: {
-                    select: {
-                        id: true,
-                        url: true,
-                    },
-                },
-            },
-            orderBy: { tradeDate: "desc" },
-        });
+        const trades = getTradesForUser(userId)
 
         return NextResponse.json({
             success: true,
@@ -72,63 +63,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const contentType = request.headers.get("content-type") || "";
-
-        // Handle JSON body (calendar add-trade flow)
-        if (contentType.includes("application/json")) {
-            const body = await request.json();
-
-            const parseResult = addTradeSchema.safeParse(body);
-
-            if (!parseResult.success) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        error: "Validation failed",
-                        details: parseResult.error.format(),
-                    },
-                    { status: 400 }
-                );
-            }
-
-            const validatedData = parseResult.data;
-
-            const trade = await prismaClient.trade.create({
-                data: {
-                    userId,
-                    symbol: validatedData.symbol,
-                    side: validatedData.side,
-                    tradeDate: new Date(validatedData.tradeDate),
-                    profitLoss: validatedData.profitLoss,
-                    note: validatedData.note,
-                },
-                include: {
-                    screenshots: true,
-                },
-            });
-
-            return NextResponse.json(
-                {
-                    success: true,
-                    trade,
-                },
-                { status: 201 }
-            );
-        }
-
-        // Handle FormData (with screenshots)
-        const formData = await request.formData();
-
+        const formData = await request.formData()
+        console.log('formData', formData)
         const symbol = formData.get("symbol") as string;
         const side = formData.get("side") as string;
+        const profitLoss = formData.get("profitLoss") as string;
         const note = formData.get("note") as string | null;
+        const tradeDate = formData.get("tradeDate") as string
         const screenshotFiles = formData.getAll("screenshots") as File[];
 
         const parseResult = createTradeSchema.safeParse({
             symbol,
             side,
+            profitLoss,
             note: note || undefined,
+            tradeDate
         });
+
+        console.log('pareseResult', parseResult)
 
         if (!parseResult.success) {
             return NextResponse.json(
@@ -143,7 +95,7 @@ export async function POST(request: NextRequest) {
 
         const validatedData = parseResult.data;
 
-        // Upload screenshots to S3 (if any)
+        // // Upload screenshots to S3 (if any)
         let screenshotUrls: string[] = [];
 
         if (screenshotFiles.length > 0) {
@@ -160,19 +112,21 @@ export async function POST(request: NextRequest) {
                 symbol: validatedData.symbol,
                 side: validatedData.side,
                 note: validatedData.note,
+                profitLoss: validatedData.profitLoss,
+                tradeDate: new Date(validatedData.tradeDate),
                 screenshots: {
-                    create: screenshotUrls.map((url) => ({ url })),
+                    create: screenshotUrls.map((key) => ({ key })),
                 },
             },
             include: {
                 screenshots: true,
             },
         });
-
+        console.log('trade', trade)
         return NextResponse.json(
             {
                 success: true,
-                trade,
+                trade: trade,
             },
             { status: 201 }
         );

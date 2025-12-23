@@ -5,7 +5,7 @@ export type TradeSide = "BUY" | "SELL";
 export interface TradeScreenshot {
     id: number;      // Int in Prisma, not string
     tradeId: number;
-    url: string;
+    key: string;
 }
 
 // Trade - matches Prisma model

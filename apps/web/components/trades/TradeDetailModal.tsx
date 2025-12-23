@@ -48,6 +48,8 @@ export default function TradeDetailModal({ isOpen, onClose, date, trades }: Trad
         setIsDeleting(null);
     };
 
+    console.log('trades', trades)
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}

@@ -10,10 +10,7 @@ const BASE_URL = "/api/trades";
 
 
 const api = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    baseURL: BASE_URL
 });
 
 
@@ -105,8 +102,9 @@ export async function getTradesApi(): Promise<
     ApiResponse<TradeWithScreenshots[]>
 > {
     try {
-        const { data } = await api.get("");
-
+        console.log("trades get api")
+        const { data } = await api.get(`${process.env.NEXTAUTH_URL}/api/trades`);
+        console.log("data", data)
         return {
             success: true,
             data: data.trades,

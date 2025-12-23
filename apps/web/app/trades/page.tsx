@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import prismaClient from "@repo/db/client";
 import TradeCalendar from "@/components/trades/TradeCalendar";
+import { getTradesForUser } from "@/lib/services/trades";
 
 export default async function TradesPage() {
     const session = await getServerSession(authOptions);
@@ -20,20 +21,6 @@ export default async function TradesPage() {
     if (!user) {
         redirect("/signin");
     }
-
-    // Fetch all trades for this user with screenshots
-    const trades = await prismaClient.trade.findMany({
-        where: { userId: user.id },
-        include: {
-            screenshots: {
-                select: {
-                    id: true,
-                    url: true
-                }
-            }
-        },
-        orderBy: { tradeDate: 'desc' }
-    });
-
+    const trades = await getTradesForUser(user.id);
     return <TradeCalendar trades={trades} />;
 }

@@ -21,7 +21,7 @@ CREATE TABLE "Session" (
     "id" TEXT NOT NULL,
     "sessionToken" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
-    "expries" TIMESTAMP(3) NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
 );
@@ -33,12 +33,22 @@ CREATE TABLE "Trade" (
     "userId" INTEGER NOT NULL,
     "symbol" TEXT NOT NULL,
     "side" "TradeSide" NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    "price" DECIMAL(10,2) NOT NULL,
+    "tradeDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "profitLoss" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "note" TEXT,
 
     CONSTRAINT "Trade_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TradeScreenshot" (
+    "id" SERIAL NOT NULL,
+    "tradeId" INTEGER NOT NULL,
+    "key" TEXT NOT NULL,
+
+    CONSTRAINT "TradeScreenshot_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -81,6 +91,9 @@ CREATE INDEX "Trade_userId_idx" ON "Trade"("userId");
 CREATE INDEX "Trade_symbol_idx" ON "Trade"("symbol");
 
 -- CreateIndex
+CREATE INDEX "Trade_tradeDate_idx" ON "Trade"("tradeDate");
+
+-- CreateIndex
 CREATE INDEX "Account_userId_idx" ON "Account"("userId");
 
 -- CreateIndex
@@ -91,6 +104,9 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Trade" ADD CONSTRAINT "Trade_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeScreenshot" ADD CONSTRAINT "TradeScreenshot_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "Trade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
