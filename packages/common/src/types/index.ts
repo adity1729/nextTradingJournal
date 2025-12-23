@@ -92,3 +92,16 @@ export interface UpdateTradeInput {
     profitLoss?: number;
     note?: string;
 }
+
+
+export interface GetTradesQuery {
+    year: number;
+    month: number;
+}
+
+export interface PaginatedTradesResponse {
+    trades: TradeWithScreenshots[];
+    year: number;
+    month: number;
+    hasMore: boolean;
+}

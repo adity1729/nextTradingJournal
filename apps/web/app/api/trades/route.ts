@@ -5,7 +5,7 @@ import prismaClient from "@repo/db/client";
 import { createTradeSchema } from "@repo/common/validations";
 import { getPresignedUrl, uploadMultipleToS3 } from "@/lib/s3";
 import { Trade, TradeScreenshot } from "@repo/common";
-import { getTradesForUser } from "@/lib/services/trades";
+import { getTradesForMonth, getTradesForUser } from "@/lib/services/trades";
 
 
 async function getAuthenticatedUserId(): Promise<number | null> {
@@ -20,7 +20,7 @@ async function getAuthenticatedUserId(): Promise<number | null> {
     return user?.id ?? null;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     console.log("get request triggered for /trades")
     try {
         const userId = await getAuthenticatedUserId();
@@ -31,12 +31,26 @@ export async function GET() {
                 { status: 401 }
             );
         }
-        const trades = getTradesForUser(userId)
+        const { searchParams } = new URL(request.url);
+        const yearParam = searchParams.get("year");
+        const monthParam = searchParams.get("month");
 
+        const now = new Date();
+        const year = yearParam ? parseInt(yearParam, 10) : now.getFullYear();
+        const month = monthParam ? parseInt(monthParam, 10) : now.getMonth();
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+            return NextResponse.json(
+                { success: false, error: "Invalid year or month parameter" },
+                { status: 400 }
+            );
+        }
+
+        const result = await getTradesForMonth(userId, year, month);
         return NextResponse.json({
             success: true,
-            trades,
+            ...result, // { trades, year, month, hasMore }
         });
+
     } catch (error) {
         console.error("Error fetching trades:", error);
 
