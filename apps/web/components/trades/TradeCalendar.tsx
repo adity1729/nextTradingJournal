@@ -254,33 +254,17 @@ function WeekCard({ week, isLastWeek }: { week: WeekTotal; isLastWeek: boolean }
     );
 }
 
-interface TradeCalendarProps {
-    initialTrades: TradeWithScreenshots[];
-    initialYear: number;
-    initialMonth: number; // 1-12 (1-indexed)
-}
-
-export default function TradeCalendar({
-    initialTrades,
-    initialYear,
-    initialMonth
-}: TradeCalendarProps) {
-    // Track current displayed month (1-12, 1-indexed)
-    const [displayYear, setDisplayYear] = useState(initialYear);
-    const [displayMonth, setDisplayMonth] = useState(initialMonth);
+export default function TradeCalendar() {
+    // Initialize with current month (1-12, 1-indexed)
+    const now = new Date();
+    const [displayYear, setDisplayYear] = useState(now.getFullYear());
+    const [displayMonth, setDisplayMonth] = useState(now.getMonth() + 1);
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [addTradeDate, setAddTradeDate] = useState<string | null>(null);
 
-    // Use React Query with SSR hydration
-    const { trades, isFetching } = useTrades(displayYear, displayMonth, {
-        initialData: {
-            trades: initialTrades,
-            year: initialYear,
-            month: initialMonth,
-            hasMore: true,
-        },
-    });
+    // Use React Query for data fetching
+    const { trades, isLoading, isFetching } = useTrades(displayYear, displayMonth);
 
     // For calendar rendering, use 0-indexed month
     const year = displayYear;
@@ -314,10 +298,8 @@ export default function TradeCalendar({
         }
     };
 
-    // Show loading overlay when navigating to a different month than initial
-    const showLoadingOverlay = isFetching && (
-        displayYear !== initialYear || displayMonth !== initialMonth
-    );
+    // Show skeleton on initial load OR when fetching new month data
+    const showLoadingOverlay = isLoading || isFetching;
 
     const isFutureDate = (dateStr: string) => dateStr > todayStr;
 
