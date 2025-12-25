@@ -4,6 +4,7 @@ import type {
     UpdateTradeInput,
     TradeWithScreenshots,
     ApiResponse,
+    PaginatedTradesResponse,
 } from "@repo/common/types";
 
 const BASE_URL = "/api/trades";
@@ -98,16 +99,24 @@ export async function deleteTradeApi(
     }
 }
 
-export async function getTradesApi(): Promise<
-    ApiResponse<TradeWithScreenshots[]>
+export async function getTradesApi(
+    year: number,
+    month: number
+): Promise<
+    ApiResponse<PaginatedTradesResponse>
 > {
     try {
         console.log("trades get api")
-        const { data } = await api.get(`${process.env.NEXTAUTH_URL}/api/trades`);
+        const { data } = await api.get(`?year=${year}&month=${month}`);
         console.log("data", data)
         return {
             success: true,
-            data: data.trades,
+            data: {
+                trades: data.trades,
+                year,
+                month,
+                hasMore: data.hasMore
+            }
         };
     } catch (error) {
         if (error instanceof AxiosError && error.response) {

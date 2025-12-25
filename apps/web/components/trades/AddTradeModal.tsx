@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addTradeApi } from "@/lib/api/trades";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddTradeModalProps {
     isOpen: boolean;
@@ -16,7 +16,7 @@ interface AddTradeModalProps {
 }
 
 export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalProps) {
-    const router = useRouter();
+    const queryClient = useQueryClient();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
@@ -64,9 +64,10 @@ export default function AddTradeModal({ isOpen, onClose, date }: AddTradeModalPr
             if (result.success) {
                 // Reset form and close
                 setFormData({ symbol: "", side: "BUY", profitLoss: "", note: "" });
+                setSelectedFiles(null);
                 onClose();
-                // Refresh to get updated data
-                router.refresh();
+                // Invalidate trades cache to refetch data
+                queryClient.invalidateQueries({ queryKey: ["trades"] });
             } else {
                 console.error("Failed to add trade:", result.error);
             }

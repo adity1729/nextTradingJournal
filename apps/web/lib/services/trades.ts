@@ -71,9 +71,7 @@ export async function getTradesForMonth(
         }
     }) > 0;
     const transformedTrades = await Promise.all(
-        trades.map((trade: Trade) => {
-            transformTradeWithUrls(trade as Trade)
-        })
+        trades.map((trade: Trade) => transformTradeWithUrls(trade))
     )
 
     return {

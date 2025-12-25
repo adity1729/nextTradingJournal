@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { X, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { TradeWithScreenshots } from "@repo/common/types";
 import { formatCurrency } from "@/lib/trade-utils";
 import { deleteTradeApi } from "@/lib/api/trades";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TradeDetailModalProps {
     isOpen: boolean;
@@ -18,7 +18,7 @@ interface TradeDetailModalProps {
 }
 
 export default function TradeDetailModal({ isOpen, onClose, date, trades }: TradeDetailModalProps) {
-    const router = useRouter();
+    const queryClient = useQueryClient();
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
     if (!isOpen) return null;
@@ -37,8 +37,12 @@ export default function TradeDetailModal({ isOpen, onClose, date, trades }: Trad
         try {
             const result = await deleteTradeApi(tradeId);
             if (result.success) {
-                // Refresh to get updated data
-                router.refresh();
+                // Invalidate trades cache to refetch data
+                queryClient.invalidateQueries({ queryKey: ["trades"] });
+                // Close modal if this was the last trade
+                if (trades.length === 1) {
+                    onClose();
+                }
             } else {
                 console.error("Failed to delete trade:", result.error);
             }
