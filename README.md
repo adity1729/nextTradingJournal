@@ -1,6 +1,6 @@
 # Turborepo 
 
-This Turborepo starter is maintained by the Turborepo core team.
+This Turborepo starter is maintained by the  core team.
 
 ## Using this 
 Run the following command:
